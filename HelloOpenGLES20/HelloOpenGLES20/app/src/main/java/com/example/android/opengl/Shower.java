@@ -279,10 +279,10 @@ public class Shower {
     // vert coord
 ///*  staotemp
     private float vertCoords[] = {
-            -0.03f,     -0.03f,     0,
-            -0.03f,     0.03f,     0,
-            0.03f,     -0.03f,     0,
-            0.03f,     0.03f,     0 };
+            -0.01f,     -0.01f,     0,
+            -0.01f,     0.01f,     0,
+            0.01f,     -0.01f,     0,
+            0.01f,     0.01f,     0 };
 //*/
 /*
     private float vertCoords[] = {
