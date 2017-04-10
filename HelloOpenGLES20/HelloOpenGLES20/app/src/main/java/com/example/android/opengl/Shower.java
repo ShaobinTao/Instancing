@@ -60,6 +60,8 @@ public class Shower {
         mTexCoordHandle = GLES20.glGetAttribLocation(mProgram2, "aTextureCoord");
         mVertCoordHandle = GLES20.glGetAttribLocation(mProgram2, "aVertexCoord");
         muMVPMatrixHandle = GLES20.glGetAttribLocation(mProgram2, "uMVPMatrix");
+        maFSParamsHandle = GLES20.glGetAttribLocation(mProgram2, "aFSParams");
+
         MyGLRenderer.checkGlError("t1");
 
         MyGLRenderer.checkGlError("t1");
@@ -68,11 +70,13 @@ public class Shower {
         GLES20.glGenBuffers(1, mVertCoordBuf, 0);
         GLES20.glGenBuffers(1, mIndexBuf, 0);
         GLES20.glGenBuffers(1, mMatrixBuf, 0);
+        GLES20.glGenBuffers(1, maFSParamsBuf, 0);
 
         MyGLRenderer.checkGlError("t1");
 
         // texture coordinates buffer
         {
+            FloatBuffer textureBuffer;
             ByteBuffer buf = ByteBuffer.allocateDirect(texCoords.length * 4 );
             buf.order(  ByteOrder.nativeOrder() );
             textureBuffer = buf.asFloatBuffer();
@@ -84,6 +88,7 @@ public class Shower {
         }
         // vertex buffer
         {
+            FloatBuffer vertBuffer;
             ByteBuffer buf = ByteBuffer.allocateDirect(vertCoords.length * 4 );
             buf.order(  ByteOrder.nativeOrder() );
             vertBuffer = buf.asFloatBuffer();
@@ -95,6 +100,7 @@ public class Shower {
         }
         // index buffer
         {
+            IntBuffer indexBuffer;
             ByteBuffer buf = ByteBuffer.allocateDirect(vertIndex.length * 4 );
             buf.order(  ByteOrder.nativeOrder() );
             indexBuffer = buf.asIntBuffer();
@@ -107,17 +113,35 @@ public class Shower {
         }
         // matrix buffer
         {
+            FloatBuffer matBuffer;
             ByteBuffer buf = ByteBuffer.allocateDirect(matricesValues.length * 4 );
             buf.order(  ByteOrder.nativeOrder() );
             matBuffer = buf.asFloatBuffer();
             matBuffer.put(matricesValues);
             matBuffer.position(0);
 
-            GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mMatrixBuf[0]);
-            GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, matBuffer.capacity() * 4, matBuffer, GLES20.GL_STATIC_DRAW );
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mMatrixBuf[0]);
+            GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, matBuffer.capacity() * 4, matBuffer, GLES20.GL_STATIC_DRAW );
             GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
         }
         MyGLRenderer.checkGlError("t1");
+
+        // aFSParams buffer
+        {
+            FloatBuffer tmpBuf;
+            ByteBuffer buf = ByteBuffer.allocateDirect(mFSParamsValues.length * 4 );
+            buf.order(  ByteOrder.nativeOrder() );
+            tmpBuf = buf.asFloatBuffer();
+            tmpBuf.put(mFSParamsValues);
+            tmpBuf.position(0);
+
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, maFSParamsBuf[0]);
+            GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, tmpBuf.capacity() * 4, tmpBuf, GLES20.GL_STATIC_DRAW );
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+        }
+        MyGLRenderer.checkGlError("t1");
+
+
     }
 
     public void draw() {
@@ -180,9 +204,15 @@ public class Shower {
         GLES20.glVertexAttribPointer(muMVPMatrixHandle+3, 4, GLES20.GL_FLOAT, false, 4*4 * 4, 4*4*3)                                                                                                                                       ; // 225541
         GLES30.glVertexAttribDivisor(muMVPMatrixHandle+3, 1);
 
+        //bind aFSParams
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, maFSParamsBuf[0])                                                                                                                                                                                          ; // 225539
+        GLES20.glEnableVertexAttribArray(maFSParamsHandle)                                                                                                                                                                                                       ; // 225540
+        GLES20.glVertexAttribPointer(maFSParamsHandle, 2, GLES20.GL_FLOAT, false, 0, 0)                                                                                                                                       ; // 225541
+        GLES30.glVertexAttribDivisor(maFSParamsHandle, 1);
 
-        GLES20.glUniform1f(muAlpha, 0.32013953f)                                                                                                                                                                                                   ; // 225542
-        GLES20.glUniform1f(muInfluence, 0.3f)                                                                                                                                                                                                          ; // 225543
+
+//        GLES20.glUniform1f(muAlpha, 0.32013953f)                                                                                                                                                                                                   ; // 225542
+//        GLES20.glUniform1f(muInfluence, 0.3f)                                                                                                                                                                                                          ; // 225543
 
 
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mIndexBuf[0])                                                                                                                                                                                  ; // 225546
@@ -233,24 +263,28 @@ public class Shower {
             "attribute mat4 uMVPMatrix;                       " +
                     "attribute vec2 aTextureCoord;                  " +
                     "attribute vec4 aVertexCoord;                   " +
+                    "attribute vec2 aFSParams;                   " +
+
                     "varying vec2 vTextureCoord;                    " +
+                    "varying vec2 vFSParams;                        " +
                     "                                               " +
                     "void main() {                                  " +
                     "    gl_Position = uMVPMatrix * aVertexCoord;   " +
                     "    vTextureCoord = aTextureCoord;             " +
+                    "    vFSParams = aFSParams;                     " +
                     "}";
 
     private final String fragmentShaderCode = "" +
             "precision highp float;                                                              " +
             "const float ONE = 1.0;                                                              " +
-            "uniform float uAlpha;                                                               " +
-            "uniform float uInfluence;                                                           " +
+//            "uniform float uAlpha;                                                             " +
+//            "uniform float uInfluence;                                                         " +
             "uniform sampler2D uTexture;                                                         " +
             "varying vec2 vTextureCoord;                                                         " +
+            "varying vec2 vFSParams;                                                             " +
             "void main() {                                                                       " +
             "    vec4 color = texture2D(uTexture, vTextureCoord);                                " +
-            "    gl_FragColor = vec4(color.rgb, (color.a + uInfluence*(ONE - color.a))*uAlpha);  " +
-//            "    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);  " +
+            "    gl_FragColor = vec4(color.rgb, (color.a + vFSParams.y*(ONE - color.a))*vFSParams.x);  " +
             "}";
 
 
@@ -265,20 +299,21 @@ public class Shower {
 
     private int mTexCoordHandle;
     private int mVertCoordHandle;
-    int   muMVPMatrixHandle;
+    private int muMVPMatrixHandle;
+    private int maFSParamsHandle;
+
 
     private int[] mTexCoordBuf = new int[1];
     private int[] mVertCoordBuf = new int[1];
     private int[] mIndexBuf = new int[1];
     private int[] mMatrixBuf = new int[1];
-
+    private int[] maFSParamsBuf = new int[1];
 
 
     // texture coordinates
     private float texCoords[] = {        1,      1,        1,     0,        0,      1,        0,     0 };
     // 2 floats
     static int texStride = 2 * 4;
-    private final FloatBuffer textureBuffer;
 
     // vert coord
 ///*  staotemp
@@ -295,13 +330,11 @@ public class Shower {
             1,     -1,     0,
             1,     1f,     0 };
 */
-    private final FloatBuffer vertBuffer;
 
     // vert indices
     private int vertIndex[] = {
             2, 0, 3, 3, 0, 1
     };
-    private final IntBuffer indexBuffer;
 
 
     // matrix buffer
@@ -412,8 +445,108 @@ public class Shower {
             -5.191355f, 0.0f, 1.07520336E-7f, 1.0574314E-7f, 0.0f, 2.9201372f, 0.0f, 0.0f, 4.538427E-7f, 0.0f, 1.2298893f, 1.2095605f, 1.1151627f, -1.1005746f, -0.9689056f, 1.0305805f,
             -2.3857305f, 0.0f, 4.9411867E-8f, 4.859514E-8f, 0.0f, 1.3419734f, 0.0f, 0.0f, 2.0856719E-7f, 0.0f, 0.5652059f, 0.5558636f, 0.098813176f, -0.91127354f, -0.74540377f, 1.2503881f
     };
-    private final FloatBuffer matBuffer;
 
-
+    private float mFSParamsValues[] = {
+            0.20416708f    ,		            0.0f,
+            0.27980208f    ,                    0.0f,
+            0.009143527f   ,                    0.0f,
+            0.062485732f   ,                    0.0f,
+            0.2630213f     ,                    0.0f,
+            0.08762257f    ,                    0.0f,
+            0.20171137f    ,                    0.0f,
+            0.17613323f    ,                    0.0f,
+            0.13819848f    ,                    0.0f,
+            0.033225294f   ,                    0.0f,
+            0.13252299f    ,                    0.0f,
+            0.13240615f    ,                    0.0f,
+            0.1409756f     ,                    0.0f,
+            0.087053806f   ,                    0.0f,
+            0.10621458f    ,                    0.0f,
+            0.083866104f   ,                    0.0f,
+            0.06350184f    ,                    0.0f,
+            0.053768713f   ,                    0.0f,
+            0.09670098f    ,                    0.0f,
+            0.05989486f    ,                    0.0f,
+            0.06960367f    ,                    0.0f,
+            0.098293126f   ,                    0.0f,
+            0.048699226f   ,                    0.0f,
+            0.03185607f    ,                    0.0f,
+            0.06301964f    ,                    0.0f,
+            0.052278396f   ,                    0.0f,
+            0.06407753f    ,                    0.0f,
+            0.03788286f    ,                    0.0f,
+            0.030334948f   ,                    0.0f,
+            0.017670825f   ,                    0.0f,
+            0.0f           ,                    0.0f,
+            0.0f           ,                    0.0f,
+            0.0f           ,                    0.0f,
+            0.0f           ,                    0.0f,
+            0.0f           ,                    0.0f,
+            0.0f           ,                    0.0f,
+            0.0f           ,                    0.0f,
+            0.21397206f    ,                    0.0f,
+            1.0907131f     ,                    0.0f,
+            0.9030114f     ,                    0.0f,
+            0.8272965f     ,                    0.0f,
+            0.73757786f    ,                    0.0f,
+            0.5776904f     ,                    0.0f,
+            0.77220464f    ,                    0.0f,
+            0.06254935f    ,                    0.0f,
+            0.29369098f    ,                    0.0f,
+            0.9282499f     ,                    0.0f,
+            0.9031905f     ,                    0.0f,
+            0.71087974f    ,                    0.0f,
+            0.74244285f    ,                    0.0f,
+            0.16224459f    ,                    0.0f,
+            0.80932313f    ,                    0.0f,
+            0.70788175f    ,                    0.0f,
+            0.048699822f   ,                    0.0f,
+            0.6641013f     ,                    0.0f,
+            0.9321543f     ,                    0.0f,
+            0.5769717f     ,                    0.0f,
+            0.22144201f    ,                    0.0f,
+            0.46618935f    ,                    0.0f,
+            0.5933195f     ,                    0.0f,
+            0.84696364f    ,                    0.0f,
+            0.63227725f    ,                    0.0f,
+            0.11252998f    ,                    0.0f,
+            0.70666564f    ,                    0.0f,
+            0.77711385f    ,                    0.0f,
+            0.74849105f    ,                    0.0f,
+            0.79333836f    ,                    0.0f,
+            0.6295482f     ,                    0.0f,
+            0.73013854f    ,                    0.0f,
+            0.23823588f    ,                    0.0f,
+            0.5902031f     ,                    0.0f,
+            0.40691665f    ,                    0.0f,
+            0.1870213f     ,                    0.0f,
+            0.54043144f    ,                    0.0f,
+            0.328143f      ,                    0.0f,
+            0.12844934f    ,                    0.0f,
+            0.4487042f     ,                    0.0f,
+            0.20172663f    ,                    0.0f,
+            0.0676617f     ,                    0.0f,
+            0.20343925f    ,                    0.0f,
+            0.59534013f    ,                    0.0f,
+            0.5904934f     ,                    0.0f,
+            0.20579901f    ,                    0.0f,
+            0.20219225f    ,                    0.0f,
+            0.35541344f    ,                    0.0f,
+            0.39963108f    ,                    0.0f,
+            0.3878631f     ,                    0.0f,
+            0.34496546f    ,                    0.0f,
+            0.049056087f   ,                    0.0f,
+            0.12341197f    ,                    0.0f,
+            0.2426543f     ,                    0.0f,
+            0.05729884f    ,                    0.0f,
+            0.28933862f    ,                    0.0f,
+            0.09398336f    ,                    0.0f,
+            0.06842917f    ,                    0.0f,
+            0.17209603f    ,                    0.0f,
+            0.2934833f     ,                    0.0f,
+            0.13177204f    ,                    0.0f,
+            0.18119915f    ,                    0.0f,
+            0.24587427f    ,                    0.0f
+    };
 
 }
