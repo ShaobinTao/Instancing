@@ -19,6 +19,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
+import android.opengl.GLES30;
 import android.opengl.GLUtils;
 
 import java.io.InputStream;
@@ -54,17 +55,19 @@ public class Shower {
         MyGLRenderer.checkGlError("t1");
         muInfluence = GLES20.glGetUniformLocation(mProgram2, "uInfluence");
         MyGLRenderer.checkGlError("t1");
-        muMVPMatrix = GLES20.glGetUniformLocation(mProgram2, "uMVPMatrix");
-        MyGLRenderer.checkGlError("t1");
+
 
         mTexCoordHandle = GLES20.glGetAttribLocation(mProgram2, "aTextureCoord");
         mVertCoordHandle = GLES20.glGetAttribLocation(mProgram2, "aVertexCoord");
+        muMVPMatrixHandle = GLES20.glGetAttribLocation(mProgram2, "uMVPMatrix");
+        MyGLRenderer.checkGlError("t1");
 
         MyGLRenderer.checkGlError("t1");
 
         GLES20.glGenBuffers(1, mTexCoordBuf, 0);
         GLES20.glGenBuffers(1, mVertCoordBuf, 0);
         GLES20.glGenBuffers(1, mIndexBuf, 0);
+        GLES20.glGenBuffers(1, mMatrixBuf, 0);
 
         MyGLRenderer.checkGlError("t1");
 
@@ -79,8 +82,7 @@ public class Shower {
             GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, textureBuffer.capacity() * 4, textureBuffer, GLES20.GL_STATIC_DRAW );
             GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
         }
-        MyGLRenderer.checkGlError("t1");
-
+        // vertex buffer
         {
             ByteBuffer buf = ByteBuffer.allocateDirect(vertCoords.length * 4 );
             buf.order(  ByteOrder.nativeOrder() );
@@ -91,7 +93,7 @@ public class Shower {
             GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, vertBuffer.capacity() * 4, vertBuffer, GLES20.GL_STATIC_DRAW );
             GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
         }
-        MyGLRenderer.checkGlError("t1");
+        // index buffer
         {
             ByteBuffer buf = ByteBuffer.allocateDirect(vertIndex.length * 4 );
             buf.order(  ByteOrder.nativeOrder() );
@@ -101,6 +103,18 @@ public class Shower {
 
             GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mIndexBuf[0]);
             GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, indexBuffer.capacity() * 4, indexBuffer, GLES20.GL_STATIC_DRAW );
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+        }
+        // matrix buffer
+        {
+            ByteBuffer buf = ByteBuffer.allocateDirect(matricesValues.length * 4 );
+            buf.order(  ByteOrder.nativeOrder() );
+            matBuffer = buf.asFloatBuffer();
+            matBuffer.put(matricesValues);
+            matBuffer.position(0);
+
+            GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mMatrixBuf[0]);
+            GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, matBuffer.capacity() * 4, matBuffer, GLES20.GL_STATIC_DRAW );
             GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
         }
         MyGLRenderer.checkGlError("t1");
@@ -147,43 +161,32 @@ public class Shower {
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVertCoordBuf[0])                                                                                                                                                                                          ; // 225539
         GLES20.glEnableVertexAttribArray(mVertCoordHandle)                                                                                                                                                                                                       ; // 225540
         GLES20.glVertexAttribPointer(mVertCoordHandle, 3, GLES20.GL_FLOAT, false, 0, 0)                                                                                                                                       ; // 225541
+
+        // bind matrix
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mMatrixBuf[0])                                                                                                                                                                                          ; // 225539
+        GLES20.glEnableVertexAttribArray(muMVPMatrixHandle)                                                                                                                                                                                                       ; // 225540
+        GLES20.glVertexAttribPointer(muMVPMatrixHandle, 4, GLES20.GL_FLOAT, false, 4*4 * 4, 0)                                                                                                                                       ; // 225541
+        GLES30.glVertexAttribDivisor(muMVPMatrixHandle, 1);
+
+        GLES20.glEnableVertexAttribArray(muMVPMatrixHandle+1)                                                                                                                                                                                                       ; // 225540
+        GLES20.glVertexAttribPointer(muMVPMatrixHandle+1, 4, GLES20.GL_FLOAT, false, 4*4 * 4, 4*4*1)                                                                                                                                       ; // 225541
+        GLES30.glVertexAttribDivisor(muMVPMatrixHandle+1, 1);
+
+        GLES20.glEnableVertexAttribArray(muMVPMatrixHandle+2)                                                                                                                                                                                                       ; // 225540
+        GLES20.glVertexAttribPointer(muMVPMatrixHandle+2, 4, GLES20.GL_FLOAT, false, 4*4 * 4, 4*4*2)                                                                                                                                       ; // 225541
+        GLES30.glVertexAttribDivisor(muMVPMatrixHandle+2, 1);
+
+        GLES20.glEnableVertexAttribArray(muMVPMatrixHandle+3)                                                                                                                                                                                                       ; // 225540
+        GLES20.glVertexAttribPointer(muMVPMatrixHandle+3, 4, GLES20.GL_FLOAT, false, 4*4 * 4, 4*4*3)                                                                                                                                       ; // 225541
+        GLES30.glVertexAttribDivisor(muMVPMatrixHandle+3, 1);
+
+
         GLES20.glUniform1f(muAlpha, 0.32013953f)                                                                                                                                                                                                   ; // 225542
         GLES20.glUniform1f(muInfluence, 0.3f)                                                                                                                                                                                                          ; // 225543
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0)                                                                                                                                                                                           ; // 225544
-        float v1[] = {-4.291935f, 0.0f, 8.8892065E-8f, 8.742278E-8f, 0.0f, 2.4142134f, 0.0f, 0.0f, 3.7521286E-7f, 0.0f, 1.0168067f, 1.0f, -1.3661366f, 1.1819212f, 0.2156434f, 2.1955502f};
-        GLES20.glUniformMatrix4fv(muMVPMatrix, 1, false, v1, 0)              ; // 225545
+
+
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mIndexBuf[0])                                                                                                                                                                                  ; // 225546
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES, 6, GLES20.GL_UNSIGNED_INT, 0)                                                                                                                                                           ; // 225547
-
-// instance 2
-        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0)                                                                                                                                                                                   ; // 225529
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0)                                                                                                                                                                                           ; // 225530
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0)                                                                                                                                                                                           ; // 225531
-        MyGLRenderer.checkGlError("t1");
-        GLES20.glUseProgram(mProgram2)                                                                                                                                                                                                                 ; // 225532
-        MyGLRenderer.checkGlError("t1");
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0)                                                                                                                                                                                                     ; // 225533
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[0]);
-        GLES20.glUniform1i(mSampler,0)                                                                                                                                                                                                            ; // 225535
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mTexCoordBuf[0])                                                                                                                                                                                          ; // 225536
-        GLES20.glEnableVertexAttribArray(mTexCoordHandle)                                                                                                                                                                                                       ; // 225537
-        GLES20.glVertexAttribPointer(mTexCoordHandle, 2, GLES20.GL_FLOAT, false, 0, 0)                                                                                                                                       ; // 225538
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mVertCoordBuf[0])                                                                                                                                                                                          ; // 225539
-        GLES20.glEnableVertexAttribArray(mVertCoordHandle)                                                                                                                                                                                                       ; // 225540
-        GLES20.glVertexAttribPointer(mVertCoordHandle, 3, GLES20.GL_FLOAT, false, 0, 0)                                                                                                                                       ; // 225541
-        GLES20.glUniform1f(muAlpha, 0.32013953f)                                                                                                                                                                                                   ; // 225542
-        GLES20.glUniform1f(muInfluence, 0.3f)                                                                                                                                                                                                          ; // 225543
-        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0)                                                                                                                                                                                           ; // 225544
-        float v2[] = {-4.291935f,       0.0f, 8.8892065E-8f, 8.742278E-8f,
-                10.0f,             12.4142134f, 10.0f, 10.0f,
-                3.7521286E-7f,    0.0f, 1.0168067f, 10.0f,
-                -1.3661366f,        1.1819212f, 0.2156434f, 20.1955502f};
-        GLES20.glUniformMatrix4fv(muMVPMatrix, 1, false, v2, 0)              ; // 225545
-        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mIndexBuf[0])                                                                                                                                                                                  ; // 225546
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES, 6, GLES20.GL_UNSIGNED_INT, 0)                                                                                                                                                           ; // 225547
-
-
-
+        GLES30.glDrawElementsInstanced(GLES20.GL_TRIANGLES, 6, GLES20.GL_UNSIGNED_INT, 0, 2/*primcount*/)                                                                                                                                                           ; // 225547
 
 
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0)      ; // 227429
@@ -227,7 +230,7 @@ public class Shower {
     }
 
     private final String vertexShaderCode =
-            "uniform mat4 uMVPMatrix;                       " +
+            "attribute mat4 uMVPMatrix;                       " +
                     "attribute vec2 aTextureCoord;                  " +
                     "attribute vec4 aVertexCoord;                   " +
                     "varying vec2 vTextureCoord;                    " +
@@ -259,14 +262,15 @@ public class Shower {
     int   mSampler;
     int   muAlpha;
     int   muInfluence;
-    int   muMVPMatrix;
 
     private int mTexCoordHandle;
     private int mVertCoordHandle;
+    int   muMVPMatrixHandle;
 
     private int[] mTexCoordBuf = new int[1];
     private int[] mVertCoordBuf = new int[1];
     private int[] mIndexBuf = new int[1];
+    private int[] mMatrixBuf = new int[1];
 
 
 
@@ -299,6 +303,18 @@ public class Shower {
     };
     private final IntBuffer indexBuffer;
 
+
+    // matrix buffer
+/*    private float matricesValues[] = {
+        -4.291935f, 0.0f, 8.8892065E-8f, 8.742278E-8f, 0.0f, 2.4142134f, 0.0f, 0.0f, 3.7521286E-7f, 0.0f, 1.0168067f, 1.0f, -1.3661366f, 1.1819212f, 0.2156434f, 2.1955502f,
+        -4.291935f, 0.0f, 8.8892065E-8f, 8.742278E-8f, 10.0f, 12.4142134f, 10.0f, 10.0f, 3.7521286E-7f, 0.0f, 1.0168067f, 10.0f, -1.3661366f, 1.1819212f, 0.2156434f, 20.1955502f
+    };
+*/
+    private float matricesValues[] = {
+            -4.291935f, 0.0f, 8.8892065E-8f, 8.742278E-8f, 10.0f, 12.4142134f, 10.0f, 10.0f, 3.7521286E-7f, 0.0f, 1.0168067f, 10.0f, -1.3661366f, 1.1819212f, 0.2156434f, 20.1955502f,
+            -4.291935f, 0.0f, 8.8892065E-8f, 8.742278E-8f, 0.0f, 2.4142134f, 0.0f, 0.0f, 3.7521286E-7f, 0.0f, 1.0168067f, 1.0f, -1.3661366f, 1.1819212f, 0.2156434f, 2.1955502f
+    };
+    private final FloatBuffer matBuffer;
 
 
 
