@@ -2252,7 +2252,7 @@ GLES20.glDrawElements(GLES20.GL_TRIANGLES, 6, GLES20.GL_UNSIGNED_INT, 0)      ;/
 
 
     public void loadTexture(Context context) {
-        InputStream imageStream = context.getResources().openRawResource(  R.drawable.rain );
+        InputStream imageStream = context.getResources().openRawResource(  R.drawable.snow );
 
         Bitmap bitmap = null;
 
@@ -2300,8 +2300,8 @@ GLES20.glDrawElements(GLES20.GL_TRIANGLES, 6, GLES20.GL_UNSIGNED_INT, 0)      ;/
             "varying vec2 vTextureCoord;                                                         " +
             "void main() {                                                                       " +
             "    vec4 color = texture2D(uTexture, vTextureCoord);                                " +
-//staotemp            "    gl_FragColor = vec4(color.rgb, (color.a + uInfluence*(ONE - color.a))*uAlpha);  " +
-            "    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);  " +
+            "    gl_FragColor = vec4(color.rgb, (color.a + uInfluence*(ONE - color.a))*uAlpha);  " +
+//staotemp            "    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);  " +
             "}";
 
 
