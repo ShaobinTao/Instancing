@@ -220,7 +220,6 @@ public class Shower {
         GLES20.glDepthMask(true)                                                                                                                                                                                                                ; // 225394
         MyGLRenderer.checkGlError("t1");
         GLES20.glClearDepthf(1.0f)                                                                                                                                                                                                                     ; // 225395
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         MyGLRenderer.checkGlError("t1");
         GLES20.glEnable(GLES20.GL_CULL_FACE)                                                                                                                                                                                                               ; // 225397
         MyGLRenderer.checkGlError("t1");
