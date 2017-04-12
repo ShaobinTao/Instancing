@@ -212,29 +212,17 @@ public class Shower {
     }
 
     public void draw() {
-        MyGLRenderer.checkGlError("t1");
         GLES20.glEnable(GLES20.GL_DEPTH_TEST)                                                                                                                                                                                                              ; // 225392
-        MyGLRenderer.checkGlError("t1");
         GLES20.glDepthFunc(GLES20.GL_LESS)                                                                                                                                                                                                                ; // 225393
-        MyGLRenderer.checkGlError("t1");
         GLES20.glDepthMask(true)                                                                                                                                                                                                                ; // 225394
-        MyGLRenderer.checkGlError("t1");
         GLES20.glClearDepthf(1.0f)                                                                                                                                                                                                                     ; // 225395
-        MyGLRenderer.checkGlError("t1");
         GLES20.glEnable(GLES20.GL_CULL_FACE)                                                                                                                                                                                                               ; // 225397
-        MyGLRenderer.checkGlError("t1");
         GLES20.glCullFace(GLES20.GL_BACK)                                                                                                                                                                                                                 ; // 225398
-        MyGLRenderer.checkGlError("t1");
         GLES20.glFrontFace(GLES20.GL_CCW)                                                                                                                                                                                                                 ; // 225399
-        MyGLRenderer.checkGlError("t1");
         GLES20.glEnable(GLES20.GL_BLEND)                                                                                                                                                                                                                   ; // 225400
-        MyGLRenderer.checkGlError("t1");
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE)                                                                                                                                                                                        ; // 225401
-        MyGLRenderer.checkGlError("t1");
         GLES20.glDisable(GLES20.GL_DEPTH_TEST)                                                                                                                                                                                                             ; // 225402
-        MyGLRenderer.checkGlError("t1");
         GLES20.glDepthMask(false)                                                                                                                                                                                                               ; // 225403
-        MyGLRenderer.checkGlError("t1");
 
         GLES20.glUseProgram(mProgramBG)                                                                                                                                                     ;//195449
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mBGaVertexCoordBuf[0])                                                                                                                              ;//195450
@@ -243,9 +231,7 @@ public class Shower {
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mBGaVertexColorBuf[0])                                                                                                                              ;//195453
 
         GLES20.glEnableVertexAttribArray(mBGVertexColorHandle)                                                                                                                                          ;//195454
-        MyGLRenderer.checkGlError("t1");
         GLES20.glVertexAttribPointer(mBGVertexColorHandle, 4, GLES20.GL_FLOAT, false, 0, 0)                                                                          ;//195455
-        MyGLRenderer.checkGlError("t1");
 
         GLES20.glUniform1f(uBGRandomMultiple, 2.0f)                                                                                                                                             ;//195456
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0)                                                                                                                              ;//195457
@@ -262,9 +248,7 @@ public class Shower {
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0)                                                                                                                                                                                   ; // 225529
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0)                                                                                                                                                                                           ; // 225530
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0)                                                                                                                                                                                           ; // 225531
-        MyGLRenderer.checkGlError("t1");
         GLES20.glUseProgram(mProgram2)                                                                                                                                                                                                                 ; // 225532
-        MyGLRenderer.checkGlError("t1");
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0)                                                                                                                                                                                                     ; // 225533
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textures[0]);
         GLES20.glUniform1i(mSampler,0)                                                                                                                                                                                                            ; // 225535
