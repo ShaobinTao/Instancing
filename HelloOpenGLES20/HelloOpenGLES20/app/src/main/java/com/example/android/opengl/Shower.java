@@ -187,7 +187,6 @@ public class Shower {
         GLES20.glDepthFunc(GLES20.GL_LESS); // 225393
         GLES20.glDepthMask(true); // 225394
         GLES20.glClearDepthf(1.0f); // 225395
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         GLES20.glEnable(GLES20.GL_CULL_FACE); // 225397
         GLES20.glCullFace(GLES20.GL_BACK); // 225398
         GLES20.glFrontFace(GLES20.GL_CCW); // 225399
@@ -204,9 +203,7 @@ public class Shower {
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mBGaVertexColorBuf[0])                                                                                                                              ;//195453
 
         GLES20.glEnableVertexAttribArray(mBGVertexColorHandle)                                                                                                                                          ;//195454
-MyGLRenderer.checkGlError("t1");
         GLES20.glVertexAttribPointer(mBGVertexColorHandle, 4, GLES20.GL_FLOAT, false, 0, 0)                                                                          ;//195455
-MyGLRenderer.checkGlError("t1");
 
         GLES20.glUniform1f(uBGRandomMultiple, 2.0f)                                                                                                                                             ;//195456
         GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0)                                                                                                                              ;//195457
