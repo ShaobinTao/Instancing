@@ -52,6 +52,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     private float mAngle;
 
+    private long mLastTime = System.nanoTime();
+
     MyGLRenderer(Context context) {
         mContext = context;
     }
@@ -76,6 +78,21 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     @Override
     public void onDrawFrame(GL10 unused) {
+        long mCurTime = System.nanoTime();
+        if( mCurTime -  mLastTime < 58275100 )
+        {
+            long ms = (mCurTime - mLastTime)/1000000;
+            int ns = (int)((mCurTime - mLastTime) % 1000000);
+            try {
+                Thread.sleep(ms, ns);
+            } catch( Exception e) {
+                Log.d("TAO", e.toString());
+            }
+
+        }
+        mLastTime = mCurTime;
+
+
 
         // Draw background color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
