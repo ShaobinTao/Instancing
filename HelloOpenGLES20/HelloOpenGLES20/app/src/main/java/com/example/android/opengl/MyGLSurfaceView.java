@@ -35,7 +35,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
         // Create an OpenGL ES 2.0 context.
         setEGLContextClientVersion(2);
 
-        setEGLConfigChooser(8, 8, 8, 8, 0, 0);
+        setEGLConfigChooser(8, 8, 8, 8, 24, 8);
         getHolder().setFormat(PixelFormat.TRANSLUCENT);
 
         setDebugFlags(DEBUG_CHECK_GL_ERROR | DEBUG_LOG_GL_CALLS);

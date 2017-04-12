@@ -44,6 +44,18 @@ public class Shower {
 
         MyGLRenderer.checkGlError("t1");
 
+        int vertexShaderBG = MyGLRenderer.loadShader(
+                GLES20.GL_VERTEX_SHADER, vsBG);
+        int fragmentShaderBG = MyGLRenderer.loadShader(
+                GLES20.GL_FRAGMENT_SHADER, fsBG);
+        mProgramBG = GLES20.glCreateProgram();             // create empty OpenGL Program
+        GLES20.glAttachShader(mProgramBG, vertexShaderBG);   // add the vertex shader to program
+        GLES20.glAttachShader(mProgramBG, fragmentShaderBG); // add the fragment shader to program
+        GLES20.glLinkProgram(mProgramBG);                  // create OpenGL program executables
+
+        MyGLRenderer.checkGlError("t1");
+
+
         GLES20.glUseProgram(mProgram2);
 
         MyGLRenderer.checkGlError("t1");
@@ -64,13 +76,25 @@ public class Shower {
 
         MyGLRenderer.checkGlError("t1");
 
+        mBGVertexCoordHandle = GLES20.glGetAttribLocation(mProgramBG, "aVertexCoord");
+        mBGVertexColorHandle = GLES20.glGetAttribLocation(mProgramBG, "aVertexColor");
+
+        //bg
+        mBGMVPMatrix = GLES20.glGetUniformLocation(mProgramBG, "uMVPMatrix");
         MyGLRenderer.checkGlError("t1");
+        uBGRandomMultiple = GLES20.glGetUniformLocation(mProgramBG, "uRandomMultiple");
+        MyGLRenderer.checkGlError("t1");
+
 
         GLES20.glGenBuffers(1, mTexCoordBuf, 0);
         GLES20.glGenBuffers(1, mVertCoordBuf, 0);
         GLES20.glGenBuffers(1, mIndexBuf, 0);
         GLES20.glGenBuffers(1, mMatrixBuf, 0);
         GLES20.glGenBuffers(1, maFSParamsBuf, 0);
+
+        GLES20.glGenBuffers(1, mBGaVertexCoordBuf, 0);
+        GLES20.glGenBuffers(1, mBGaVertexColorBuf, 0);
+        GLES20.glGenBuffers(1, mBGIndexBuf, 0);
 
         MyGLRenderer.checkGlError("t1");
 
@@ -141,6 +165,49 @@ public class Shower {
         }
         MyGLRenderer.checkGlError("t1");
 
+        // bg buf1
+        {
+            FloatBuffer bgaVertexCoord;
+            ByteBuffer buf = ByteBuffer.allocateDirect(bgBuf1.length * 4);
+            buf.order(ByteOrder.nativeOrder());
+            bgaVertexCoord = buf.asFloatBuffer();
+            bgaVertexCoord.put(bgBuf1);
+            bgaVertexCoord.position(0);
+
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mBGaVertexCoordBuf[0]);
+            GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, bgaVertexCoord.capacity() * 4, bgaVertexCoord, GLES20.GL_STATIC_DRAW);
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+        }
+        MyGLRenderer.checkGlError("t1");
+
+        // bg buf3
+        {
+            FloatBuffer bgaVertexColor;
+            ByteBuffer buf = ByteBuffer.allocateDirect(bgBuf3.length * 4);
+            buf.order(ByteOrder.nativeOrder());
+            bgaVertexColor = buf.asFloatBuffer();
+            bgaVertexColor.put(bgBuf3);
+            bgaVertexColor.position(0);
+
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mBGaVertexColorBuf[0]);
+            GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, bgaVertexColor.capacity() * 4, bgaVertexColor, GLES20.GL_STATIC_DRAW);
+            GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0);
+        }
+        MyGLRenderer.checkGlError("t1");
+
+        {
+            IntBuffer bgIndexBuffer;
+            ByteBuffer buf = ByteBuffer.allocateDirect(bgBuf4.length * 4);
+            buf.order(ByteOrder.nativeOrder());
+            bgIndexBuffer = buf.asIntBuffer();
+            bgIndexBuffer.put(bgBuf4);
+            bgIndexBuffer.position(0);
+
+            GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mBGIndexBuf[0]);
+            GLES20.glBufferData(GLES20.GL_ELEMENT_ARRAY_BUFFER, bgIndexBuffer.capacity() * 4, bgIndexBuffer, GLES20.GL_STATIC_DRAW);
+            GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0);
+        }
+        MyGLRenderer.checkGlError("t1");
 
     }
 
@@ -153,6 +220,7 @@ public class Shower {
         GLES20.glDepthMask(true)                                                                                                                                                                                                                ; // 225394
         MyGLRenderer.checkGlError("t1");
         GLES20.glClearDepthf(1.0f)                                                                                                                                                                                                                     ; // 225395
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         MyGLRenderer.checkGlError("t1");
         GLES20.glEnable(GLES20.GL_CULL_FACE)                                                                                                                                                                                                               ; // 225397
         MyGLRenderer.checkGlError("t1");
@@ -168,6 +236,28 @@ public class Shower {
         MyGLRenderer.checkGlError("t1");
         GLES20.glDepthMask(false)                                                                                                                                                                                                               ; // 225403
         MyGLRenderer.checkGlError("t1");
+
+        GLES20.glUseProgram(mProgramBG)                                                                                                                                                     ;//195449
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mBGaVertexCoordBuf[0])                                                                                                                              ;//195450
+        GLES20.glEnableVertexAttribArray(mBGVertexCoordHandle)                                                                                                                                          ;//195451
+        GLES20.glVertexAttribPointer(mBGVertexCoordHandle, 3, GLES20.GL_FLOAT, false, 0, 0)                                                                          ;//195452
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, mBGaVertexColorBuf[0])                                                                                                                              ;//195453
+
+        GLES20.glEnableVertexAttribArray(mBGVertexColorHandle)                                                                                                                                          ;//195454
+        MyGLRenderer.checkGlError("t1");
+        GLES20.glVertexAttribPointer(mBGVertexColorHandle, 4, GLES20.GL_FLOAT, false, 0, 0)                                                                          ;//195455
+        MyGLRenderer.checkGlError("t1");
+
+        GLES20.glUniform1f(uBGRandomMultiple, 2.0f)                                                                                                                                             ;//195456
+        GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0)                                                                                                                              ;//195457
+        {
+            float value[] = {1.7777778f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -0.016806724f, 0.0f, 0.0f, 0.0f, -0.94957983f, 1.0f};
+            GLES20.glUniformMatrix4fv(mBGMVPMatrix, 1, false, value, 0);//195476
+        }
+        GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, mBGIndexBuf[0])                                                                                                                      ;//195459
+        GLES20.glDrawElements(GLES20.GL_TRIANGLES, 6,    GLES20.GL_UNSIGNED_INT, 0);
+
+
 
 // instance 1
         GLES20.glBindBuffer(GLES20.GL_ELEMENT_ARRAY_BUFFER, 0)                                                                                                                                                                                   ; // 225529
@@ -284,12 +374,47 @@ public class Shower {
             "varying vec2 vFSParams;                                                             " +
             "void main() {                                                                       " +
             "    vec4 color = texture2D(uTexture, vTextureCoord);                                " +
-            "    gl_FragColor = vec4(color.rgb, (color.a + vFSParams.y*(ONE - color.a))*vFSParams.x);  " +
+            "    gl_FragColor = vec4(color.rgb, (color.a )*vFSParams.x);  " +
             "}";
 
+    private final String vsBG =
+            " uniform mat4 uMVPMatrix;                   " +
+                    " attribute vec4 aVertexCoord;               " +
+                    " attribute vec4 aVertexColor;               " +
+                    " varying vec4 vVertexColor;                 " +
+                    "                                            " +
+                    " void main() {                              " +
+                    "   gl_Position = uMVPMatrix * aVertexCoord; " +
+                    "   vVertexColor = aVertexColor;             " +
+                    "}";
+
+    private final String fsBG =
+            " precision highp float;                                  " +
+                    " const float COLOR = 255.0;                              " +
+                    " const vec2 CVEC = vec2(12.9898,78.233);                 " +
+                    " const float FACTOR = 43758.5453;                        " +
+                    " uniform float uRandomMultiple;                          " +
+                    " varying vec4 vVertexColor;                              " +
+                    "                                                         " +
+                    " float rand(vec2 v) {                                    " +
+                    "   return fract(sin(dot(v.xy ,CVEC)) * FACTOR);          " +
+                    " }                                                       " +
+                    "                                                         " +
+                    " vec4 randomDither() {                                   " +
+                    "   float random = rand(gl_FragCoord.xy)*uRandomMultiple/COLOR; " +
+                    "   vec4 o = vVertexColor;  " +
+                    "   o.rgb += random;        " +
+                    "   return o;               " +
+                    " }                                                       " +
+                    "                                                         " +
+                    " void main() {                                           " +
+                    "   vec4 color = randomDither();                          " +
+                    "   gl_FragColor = vec4(color.rgb, color.a);              " +
+                    "}";
 
 
 
+    private final int mProgramBG;
     private final int mProgram2;
     private int[] textures = new int[1];
 
@@ -301,6 +426,9 @@ public class Shower {
     private int mVertCoordHandle;
     private int muMVPMatrixHandle;
     private int maFSParamsHandle;
+
+    int   mBGMVPMatrix;
+    int   uBGRandomMultiple;
 
 
     private int[] mTexCoordBuf = new int[1];
@@ -548,5 +676,31 @@ public class Shower {
             0.18119915f    ,                    0.0f,
             0.24587427f    ,                    0.0f
     };
+
+    // bg buf 3
+    private float bgBuf3[] = {
+            0.004f, 	0.0157f, 	0.0275f, 	1.0f,
+            0.0471f,    0.157f, 	0.2078f, 	1.0f,
+            0.0471f,    0.157f, 	0.2078f, 	1.0f,
+            0.004f, 	0.0157f, 	0.0275f, 	1.0f};
+
+
+    private float bgBuf1[] = {
+            -0.5625f, 		1f, 		-116f,
+            -0.5625f,       -1f, 		-116f,
+            0.5625f, 		-1f,        -116f,
+            0.5625f, 		1f, 		-116f };
+
+    private int bgBuf4[] = {
+            0,     1,     2,     2,     3,     0
+    };
+
+    private int[] mBGaVertexCoordBuf = new int[1];
+    private int[] mBGaVertexColorBuf = new int[1];
+    private int[] mBGIndexBuf = new int[1];
+
+
+    private int mBGVertexCoordHandle;
+    private int mBGVertexColorHandle;
 
 }
