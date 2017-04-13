@@ -79,22 +79,18 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onDrawFrame(GL10 unused) {
         long mCurTime = System.nanoTime();
-        if( mCurTime -  mLastTime < 58275100 )
+        long delta = mCurTime -  mLastTime;
+        if( delta < 58275100 )
         {
             long ms = (mCurTime - mLastTime)/1000000;
-            int ns = (int)((mCurTime - mLastTime) % 1000000);
+            int  ns = (int)((mCurTime - mLastTime) % 1000000);
             try {
-//Log.d("TAO  ms", Long.toString(ms));
-//long t1 = System.nanoTime();
-                Thread.sleep(ms, ns);
-//long t2 = System.nanoTime();
-//Log.d("TAO  slept", Long.toString((t2 - t1)/1000000) );
+                Thread.sleep(33 + ms, ns);
+
             } catch( Exception e) {
                 Log.d("TAO exception", e.toString());
             }
         }
-        mLastTime = System.nanoTime();
-
 
 
         // Draw background color
@@ -102,6 +98,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         mShower.draw();
 
+
+        mLastTime = System.nanoTime();
 
 /*
         mBall.draw();
