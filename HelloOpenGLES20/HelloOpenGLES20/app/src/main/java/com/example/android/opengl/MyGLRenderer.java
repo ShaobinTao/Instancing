@@ -85,7 +85,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             long ms = (mCurTime - mLastTime)/1000000;
             int  ns = (int)((mCurTime - mLastTime) % 1000000);
             try {
-                Thread.sleep(33 + ms, ns);
+                Thread.sleep(ms, ns);
 
             } catch( Exception e) {
                 Log.d("TAO exception", e.toString());
