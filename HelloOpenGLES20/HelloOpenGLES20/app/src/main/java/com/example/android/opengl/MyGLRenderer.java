@@ -86,11 +86,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             try {
                 Thread.sleep(ms, ns);
             } catch( Exception e) {
-                Log.d("TAO", e.toString());
+                Log.d("TAO exception", e.toString());
             }
 
         }
-        mLastTime = mCurTime;
+        mLastTime = System.nanoTime();
 
 
 
